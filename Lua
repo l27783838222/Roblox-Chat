@@ -1,5 +1,5 @@
--- الرابط العالمي الخاص بسيرفر تيرمكس حقك (تم تحديثه برابطك الجديد)
-local SERVER_URL = "https://adfcc5fd9993e1.lhr.life" 
+-- الرابط العالمي الجديد الخاص بسيرفر Railway حقك (تم تحديثه)
+local SERVER_URL = "https://roblox-chat-production.up.railway.app" 
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -8,7 +8,7 @@ local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local ToggleButton = Instance.new("TextButton") -- زر التقليص والتكبير الجديد
+local ToggleButton = Instance.new("TextButton") -- زر التقليص والتكبير
 local ChatBox = Instance.new("ScrollingFrame") -- الصندوق المخصص لعرض تاريخ الرسائل
 local UIListLayout = Instance.new("UIListLayout")
 local TextBox = Instance.new("TextBox")
@@ -52,7 +52,7 @@ ToggleButton.MouseButton1Click:Connect(function()
         ChatBox.Visible = false
         TextBox.Visible = false
         SendButton.Visible = false
-        MainFrame.Size = UDim2.new(0, 340, 0, 40) -- تقليص الارتفاع ليصبح مستطيل صغير
+        MainFrame.Size = UDim2.new(0, 340, 0, 40) -- تقليص الارتفاع
         ToggleButton.Text = "+"
         isMinimized = true
     else
@@ -114,7 +114,7 @@ local function AddMessageToChatBox(text)
     ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
 end
 
--- 📡 وظيفة إرسال الرسالة إلى سيرفر بايثون في تيرمكس
+-- 📡 وظيفة إرسال الرسالة إلى سيرفر بايثون على Railway
 local function SendMessageToServer(text)
     local payload = {
         username = LocalPlayer.Name,
@@ -131,11 +131,11 @@ local function SendMessageToServer(text)
     end)
 end
 
--- متغيرات التحكم في ليمت منع السبام (1 ثانية)
+-- ⚡ متغيرات التحكم في ليمت منع السبام الجديد (تم تعديله إلى 0.20 ثانية)
 local canSend = true
-local cooldownTime = 1.0
+local cooldownTime = 0.20
 
--- تفعيل زر الإرسال عند الضغط مع العداد التنازلي المطور
+-- تفعيل زر الإرسال عند الضغط مع العداد التنازلي السريع
 SendButton.MouseButton1Click:Connect(function()
     if TextBox.Text ~= "" and canSend then
         canSend = false
@@ -143,7 +143,7 @@ SendButton.MouseButton1Click:Connect(function()
         SendMessageToServer(TextBox.Text)
         TextBox.Text = "" 
         
-        -- تحويل الزر للون الأحمر وبدء العد التنازلي بأجزاء الثانية
+        -- تحويل الزر للون الأحمر وبدء العد التنازلي فائق السرعة
         SendButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
         
         local timeLeft = cooldownTime
@@ -160,7 +160,7 @@ SendButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- 📥 وظيفة جلب شات السيرفر باستمرار وتحديث القائمة أمام اللاعبين
+-- 📥 وظيفة جلب شات السيرفر باستمرار وتحديث القائمة (تم تقليل الوقت ليكون سريع جداً)
 local last_count = 0
 task.spawn(function()
     while true do
@@ -180,7 +180,7 @@ task.spawn(function()
                 end
             end
         end)
-        task.wait(2) -- سحب التحديثات كل ثانيتين
+        task.wait(0.5) -- سحب التحديثات كل نصف ثانية لمزامنة سريعة جداً مع الـ 0.20
     end
 end)
 
