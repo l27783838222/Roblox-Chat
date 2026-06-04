@@ -1,0 +1,173 @@
+-- الرابط العالمي الخاص بسيرفر تيرمكس حقك
+local SERVER_URL = "https://65314b9ba5ec29.lhr.life" 
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- 🛠️ بناء واجهة شات مستقلة بالكامل (GUI)
+local ScreenGui = Instance.new("ScreenGui")
+local MainFrame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local CloseButton = Instance.new("TextButton") -- زر الإغلاق الجديد
+local ChatBox = Instance.new("ScrollingFrame")
+local UIListLayout = Instance.new("UIListLayout")
+local TextBox = Instance.new("TextBox")
+local SendButton = Instance.new("TextButton")
+
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- اللوحة الرئيسية
+MainFrame.Name = "IndependentChatFrame"
+MainFrame.Parent = ScreenGui
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
+MainFrame.Size = UDim2.new(0, 340, 0, 260)
+MainFrame.Active = true
+MainFrame.Draggable = true 
+
+-- العنوان العلوي
+Title.Parent = MainFrame
+Title.Text = "  💬 غرفة الدردشة العالمية"
+Title.Size = UDim2.new(1, 0, 0.15, 0)
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+-- 🛑 زر إغلاق الواجهة (X)
+CloseButton.Parent = MainFrame
+CloseButton.Text = "X"
+CloseButton.Size = UDim2.new(0.1, 0, 0.15, 0)
+CloseButton.Position = UDim2.new(0.9, 0, 0, 0)
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextSize = 14
+
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy() -- يحذف الواجهة بالكامل من الشاشة عند الضغط عليه
+end)
+
+-- صندوق عرض الرسائل (المرئي)
+ChatBox.Parent = MainFrame
+ChatBox.Position = UDim2.new(0.05, 0, 0.18, 0)
+ChatBox.Size = UDim2.new(0.9, 0, 0.58, 0)
+ChatBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+ChatBox.BorderSizePixel = 0
+ChatBox.CanvasSize = UDim2.new(0, 0, 0, 0)
+ChatBox.AutomaticCanvasSize = Enum.AutomaticSize.Y 
+
+-- ترتيب الرسائل تلقائياً تحت بعضها
+UIListLayout.Parent = ChatBox
+UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+UIListLayout.Padding = UDim.new(0, 4)
+
+-- مربع الكتابة
+TextBox.Parent = MainFrame
+TextBox.PlaceholderText = "اكتب رسالتك هنا..."
+TextBox.Position = UDim2.new(0.05, 0, 0.78, 0)
+TextBox.Size = UDim2.new(0.68, 0, 0.16, 0)
+TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextXAlignment = Enum.TextXAlignment.Right 
+TextBox.Text = ""
+
+-- زر الإرسال
+SendButton.Parent = MainFrame
+SendButton.Text = "إرسال"
+SendButton.Position = UDim2.new(0.75, 0, 0.78, 0)
+SendButton.Size = UDim2.new(0.2, 0, 0.16, 0)
+SendButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+SendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+SendButton.Font = Enum.Font.SourceSansBold
+SendButton.TextSize = 14
+
+-- ✨ وظيفة إدراج الرسالة داخل الصندوق المرئي على الشاشة
+local function AddMessageToChatBox(text)
+    local MessageLabel = Instance.new("TextLabel")
+    MessageLabel.Parent = ChatBox
+    MessageLabel.Size = UDim2.new(1, -10, 0, 22)
+    MessageLabel.BackgroundTransparency = 1
+    MessageLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+    MessageLabel.TextXAlignment = Enum.TextXAlignment.Right 
+    MessageLabel.TextSize = 14
+    MessageLabel.Text = text
+    ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
+end
+
+-- 📡 وظيفة إرسال الرسالة إلى سيرفر بايثون في تيرمكس
+local function SendMessageToServer(text)
+    local payload = {
+        username = LocalPlayer.Name,
+        message = text
+    }
+    
+    pcall(function()
+        return request({
+            Url = SERVER_URL .. "/send_message",
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = game:GetService("HttpService"):JSONEncode(payload)
+        })
+    end)
+end
+
+-- متغير للتحكم في مهلة منع السبام
+local canSend = true
+local cooldownTime = 1.0 -- مدة الليمت (ثانية واحدة)
+
+-- تفعيل زر الإرسال مع عداد تنازلي دقيق بأجزاء الثانية
+SendButton.MouseButton1Click:Connect(function()
+    if TextBox.Text ~= "" and canSend then
+        canSend = false
+        
+        -- إرسال الرسالة وتفريغ الصندوق
+        SendMessageToServer(TextBox.Text)
+        TextBox.Text = ""
+        
+        -- تغيير شكل الزر للون الأحمر استعداداً للعد التنازلي
+        SendButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+        
+        -- حلقة تكرار لتحديث الوقت بدقة (كل 0.05 ثانية) ليعطي شكل العداد الاحترافي
+        local timeLeft = cooldownTime
+        while timeLeft > 0 do
+            SendButton.Text = string.format("%.2f", timeLeft)
+            task.wait(0.05)
+            timeLeft = timeLeft - 0.05
+        end
+        
+        -- إعادة الزر لطبيعته بعد انتهاء الوقت
+        SendButton.Text = "إرسال"
+        SendButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+        canSend = true
+    end
+end)
+
+-- 📥 وظيفة جلب شات السيرفر باستمرار وتحديث القائمة أمام اللاعبين
+local last_count = 0
+task.spawn(function()
+    while true do
+        pcall(function()
+            local res = request({
+                Url = SERVER_URL .. "/get_chat",
+                Method = "GET"
+            })
+            
+            if res.StatusCode == 200 then
+                local data = game:GetService("HttpService"):JSONDecode(res.Body)
+                if #data.messages > last_count then
+                    for i = last_count + 1, #data.messages do
+                        AddMessageToChatBox(data.messages[i])
+                    end
+                    last_count = #data.messages
+                end
+            end
+        end)
+        task.wait(2) 
+    end
+end)
+
+-- إرسال إشعار دخول اللاعب
+SendMessageToServer("متصل بالدردشة العالمية!")
+
