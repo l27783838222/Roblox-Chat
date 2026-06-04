@@ -1,5 +1,5 @@
--- الرابط العالمي الخاص بسيرفر تيرمكس حقك
-local SERVER_URL = "https://0ab534b7df8380.lhr.life" 
+-- الرابط العالمي الخاص بسيرفر تيرمكس حقك (تم تحديثه برابطك الجديد)
+local SERVER_URL = "https://a6db2433884dd2.lhr.life" 
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -9,14 +9,14 @@ local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
 local ToggleButton = Instance.new("TextButton") -- زر التقليص والتكبير الجديد
-local ChatBox = Instance.new("ScrollingFrame")
+local ChatBox = Instance.new("ScrollingFrame") -- الصندوق المخصص لعرض تاريخ الرسائل
 local UIListLayout = Instance.new("UIListLayout")
 local TextBox = Instance.new("TextBox")
 local SendButton = Instance.new("TextButton")
 
 ScreenGui.Parent = game:GetService("CoreGui")
 
--- اللوحة الرئيسية (قابلة للتحريك)
+-- اللوحة الرئيسية
 MainFrame.Name = "IndependentChatFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -27,7 +27,7 @@ MainFrame.Draggable = true
 
 -- العنوان العلوي
 Title.Parent = MainFrame
-Title.Text = "  💬 غرفة الدردشة العالمية"
+Title.Text = "  💬 غرفة الدردشة العالمية المستقلة"
 Title.Size = UDim2.new(1, 0, 0.15, 0)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
 Title.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
@@ -35,34 +35,32 @@ Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- 🛑 زر التقليص / التكبير الجديد (-)
+-- 🛑 زر التقليص / التكبير (-)
 ToggleButton.Parent = MainFrame
 ToggleButton.Text = "-"
 ToggleButton.Size = UDim2.new(0.1, 0, 0.15, 0)
 ToggleButton.Position = UDim2.new(0.9, 0, 0, 0)
 ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255) -- لون أزرق مميز للتحكم
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
 ToggleButton.Font = Enum.Font.SourceSansBold
 ToggleButton.TextSize = 16
 
--- وظيفة تقليص وتكبير القائمة
+-- وظيفة تقليص وتكبير القائمة المستطيلة
 local isMinimized = false
 ToggleButton.MouseButton1Click:Connect(function()
     if not isMinimized then
-        -- تقليص اللوحة لتصبح مجرد مستطيل علوي صغير
         ChatBox.Visible = false
         TextBox.Visible = false
         SendButton.Visible = false
-        MainFrame.Size = UDim2.new(0, 340, 0, 40) -- تصغير الارتفاع بالكامل
-        ToggleButton.Text = "+" -- تحويل الزر لعلامة زائد للتكبير
+        MainFrame.Size = UDim2.new(0, 340, 0, 40) -- تقليص الارتفاع ليصبح مستطيل صغير
+        ToggleButton.Text = "+"
         isMinimized = true
     else
-        -- إعادة اللوحة لحجمها الكبير الطبيعي
-        MainFrame.Size = UDim2.new(0, 340, 0, 260)
+        MainFrame.Size = UDim2.new(0, 340, 0, 260) -- إرجاع الحجم الطبيعي
         ChatBox.Visible = true
         TextBox.Visible = true
         SendButton.Visible = true
-        ToggleButton.Text = "-" -- إعادة الزر لعلامة ناقص للتقليص
+        ToggleButton.Text = "-"
         isMinimized = false
     end
 end)
@@ -111,6 +109,8 @@ local function AddMessageToChatBox(text)
     MessageLabel.TextXAlignment = Enum.TextXAlignment.Right 
     MessageLabel.TextSize = 14
     MessageLabel.Text = text
+    
+    -- النزول التلقائي لآخر رسالة وصلت
     ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
 end
 
@@ -131,23 +131,21 @@ local function SendMessageToServer(text)
     end)
 end
 
--- متغير للتحكم في مهلة منع السبام
+-- متغيرات التحكم في ليمت منع السبام (1 ثانية)
 local canSend = true
-local cooldownTime = 1.0 -- مدة الليمت (ثانية واحدة)
+local cooldownTime = 1.0
 
--- تفعيل زر الإرسال مع عداد تنازلي دقيق بأجزاء الثانية
+-- تفعيل زر الإرسال عند الضغط مع العداد التنازلي المطور
 SendButton.MouseButton1Click:Connect(function()
     if TextBox.Text ~= "" and canSend then
         canSend = false
         
-        -- إرسال الرسالة وتفريغ الصندوق
         SendMessageToServer(TextBox.Text)
-        TextBox.Text = ""
+        TextBox.Text = "" 
         
-        -- تغيير شكل الزر للون الأحمر استعداداً للعد التنازلي
+        -- تحويل الزر للون الأحمر وبدء العد التنازلي بأجزاء الثانية
         SendButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
         
-        -- حلقة تكرار لتحديث الوقت بدقة (كل 0.05 ثانية) ليعطي شكل العداد الاحترافي
         local timeLeft = cooldownTime
         while timeLeft > 0 do
             SendButton.Text = string.format("%.2f", timeLeft)
@@ -155,7 +153,7 @@ SendButton.MouseButton1Click:Connect(function()
             timeLeft = timeLeft - 0.05
         end
         
-        -- إعادة الزر لطبيعته بعد انتهاء الوقت
+        -- إعادة الزر لطبيعته
         SendButton.Text = "إرسال"
         SendButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
         canSend = true
@@ -182,7 +180,7 @@ task.spawn(function()
                 end
             end
         end)
-        task.wait(2) 
+        task.wait(2) -- سحب التحديثات كل ثانيتين
     end
 end)
 
