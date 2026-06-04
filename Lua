@@ -1,5 +1,5 @@
 -- الرابط العالمي الخاص بسيرفر تيرمكس حقك
-local SERVER_URL = "https://65314b9ba5ec29.lhr.life" 
+local SERVER_URL = "https://0ab534b7df8380.lhr.life" 
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -8,7 +8,7 @@ local LocalPlayer = Players.LocalPlayer
 local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local Title = Instance.new("TextLabel")
-local CloseButton = Instance.new("TextButton") -- زر الإغلاق الجديد
+local ToggleButton = Instance.new("TextButton") -- زر التقليص والتكبير الجديد
 local ChatBox = Instance.new("ScrollingFrame")
 local UIListLayout = Instance.new("UIListLayout")
 local TextBox = Instance.new("TextBox")
@@ -16,7 +16,7 @@ local SendButton = Instance.new("TextButton")
 
 ScreenGui.Parent = game:GetService("CoreGui")
 
--- اللوحة الرئيسية
+-- اللوحة الرئيسية (قابلة للتحريك)
 MainFrame.Name = "IndependentChatFrame"
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -35,18 +35,36 @@ Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 14
 Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- 🛑 زر إغلاق الواجهة (X)
-CloseButton.Parent = MainFrame
-CloseButton.Text = "X"
-CloseButton.Size = UDim2.new(0.1, 0, 0.15, 0)
-CloseButton.Position = UDim2.new(0.9, 0, 0, 0)
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-CloseButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-CloseButton.Font = Enum.Font.SourceSansBold
-CloseButton.TextSize = 14
+-- 🛑 زر التقليص / التكبير الجديد (-)
+ToggleButton.Parent = MainFrame
+ToggleButton.Text = "-"
+ToggleButton.Size = UDim2.new(0.1, 0, 0.15, 0)
+ToggleButton.Position = UDim2.new(0.9, 0, 0, 0)
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255) -- لون أزرق مميز للتحكم
+ToggleButton.Font = Enum.Font.SourceSansBold
+ToggleButton.TextSize = 16
 
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy() -- يحذف الواجهة بالكامل من الشاشة عند الضغط عليه
+-- وظيفة تقليص وتكبير القائمة
+local isMinimized = false
+ToggleButton.MouseButton1Click:Connect(function()
+    if not isMinimized then
+        -- تقليص اللوحة لتصبح مجرد مستطيل علوي صغير
+        ChatBox.Visible = false
+        TextBox.Visible = false
+        SendButton.Visible = false
+        MainFrame.Size = UDim2.new(0, 340, 0, 40) -- تصغير الارتفاع بالكامل
+        ToggleButton.Text = "+" -- تحويل الزر لعلامة زائد للتكبير
+        isMinimized = true
+    else
+        -- إعادة اللوحة لحجمها الكبير الطبيعي
+        MainFrame.Size = UDim2.new(0, 340, 0, 260)
+        ChatBox.Visible = true
+        TextBox.Visible = true
+        SendButton.Visible = true
+        ToggleButton.Text = "-" -- إعادة الزر لعلامة ناقص للتقليص
+        isMinimized = false
+    end
 end)
 
 -- صندوق عرض الرسائل (المرئي)
@@ -170,4 +188,3 @@ end)
 
 -- إرسال إشعار دخول اللاعب
 SendMessageToServer("متصل بالدردشة العالمية!")
-
