@@ -1,5 +1,5 @@
 -- الرابط العالمي الخاص بسيرفر تيرمكس حقك (تم تحديثه برابطك الجديد)
-local SERVER_URL = "https://a6db2433884dd2.lhr.life" 
+local SERVER_URL = "https://adfcc5fd9993e1.lhr.life" 
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
