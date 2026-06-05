@@ -1,120 +1,110 @@
--- الرابط العالمي الجديد الخاص بسيرفر Railway حقك (تم تحديثه)
 local SERVER_URL = "https://roblox-chat-production.up.railway.app" 
 
+local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
 
--- 🛠️ بناء واجهة شات مستقلة بالكامل (GUI)
-local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local Title = Instance.new("TextLabel")
-local ToggleButton = Instance.new("TextButton") -- زر التقليص والتكبير
-local ChatBox = Instance.new("ScrollingFrame") -- الصندوق المخصص لعرض تاريخ الرسائل
-local UIListLayout = Instance.new("UIListLayout")
-local TextBox = Instance.new("TextBox")
-local SendButton = Instance.new("TextButton")
-
-ScreenGui.Parent = game:GetService("CoreGui")
-
--- اللوحة الرئيسية
-MainFrame.Name = "IndependentChatFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-MainFrame.Position = UDim2.new(0.1, 0, 0.2, 0)
-MainFrame.Size = UDim2.new(0, 340, 0, 260)
-MainFrame.Active = true
-MainFrame.Draggable = true 
-
--- العنوان العلوي
-Title.Parent = MainFrame
-Title.Text = "  💬 غرفة الدردشة العالمية المستقلة"
-Title.Size = UDim2.new(1, 0, 0.15, 0)
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-Title.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-Title.Font = Enum.Font.SourceSansBold
-Title.TextSize = 14
-Title.TextXAlignment = Enum.TextXAlignment.Left
-
--- 🛑 زر التقليص / التكبير (-)
-ToggleButton.Parent = MainFrame
-ToggleButton.Text = "-"
-ToggleButton.Size = UDim2.new(0.1, 0, 0.15, 0)
-ToggleButton.Position = UDim2.new(0.9, 0, 0, 0)
-ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-ToggleButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
-ToggleButton.Font = Enum.Font.SourceSansBold
-ToggleButton.TextSize = 16
-
--- وظيفة تقليص وتكبير القائمة المستطيلة
-local isMinimized = false
-ToggleButton.MouseButton1Click:Connect(function()
-    if not isMinimized then
-        ChatBox.Visible = false
-        TextBox.Visible = false
-        SendButton.Visible = false
-        MainFrame.Size = UDim2.new(0, 340, 0, 40) -- تقليص الارتفاع
-        ToggleButton.Text = "+"
-        isMinimized = true
-    else
-        MainFrame.Size = UDim2.new(0, 340, 0, 260) -- إرجاع الحجم الطبيعي
-        ChatBox.Visible = true
-        TextBox.Visible = true
-        SendButton.Visible = true
-        ToggleButton.Text = "-"
-        isMinimized = false
-    end
+pcall(function()
+    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
 end)
 
--- صندوق عرض الرسائل (المرئي)
-ChatBox.Parent = MainFrame
-ChatBox.Position = UDim2.new(0.05, 0, 0.18, 0)
-ChatBox.Size = UDim2.new(0.9, 0, 0.58, 0)
-ChatBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "PerfectGlobalCircleChat"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true 
+ScreenGui.Parent = game:GetService("CoreGui")
+
+local EliteCircle = Instance.new("Frame")
+EliteCircle.Parent = ScreenGui
+EliteCircle.Size = UDim2.new(0, 46, 0, 46) 
+EliteCircle.Position = UDim2.new(0, 15, 0, 58) 
+EliteCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+EliteCircle.BackgroundTransparency = 0.2 
+EliteCircle.BorderSizePixel = 0
+
+local UICornerCircle = Instance.new("UICorner")
+UICornerCircle.CornerRadius = UDim.new(1, 0) 
+UICornerCircle.Parent = EliteCircle
+
+local ClassicChatIcon = Instance.new("TextButton")
+ClassicChatIcon.Parent = EliteCircle
+ClassicChatIcon.Size = UDim2.new(1, 0, 1, 0)
+ClassicChatIcon.BackgroundTransparency = 1
+ClassicChatIcon.Text = "[=]" 
+ClassicChatIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
+ClassicChatIcon.TextSize = 19 
+ClassicChatIcon.Font = Enum.Font.Code 
+ClassicChatIcon.TextTransparency = 0 
+
+local ChatFrame = Instance.new("Frame")
+ChatFrame.Parent = ScreenGui
+ChatFrame.Size = UDim2.new(0, 360, 0, 150)
+ChatFrame.Position = UDim2.new(0, 16, 0, 115) 
+ChatFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+ChatFrame.BackgroundTransparency = 0.4
+ChatFrame.BorderSizePixel = 0
+ChatFrame.Visible = true
+
+local ChatBox = Instance.new("ScrollingFrame")
+ChatBox.Parent = ChatFrame
+ChatBox.Size = UDim2.new(1, -10, 0.78, -5)
+ChatBox.Position = UDim2.new(0, 5, 0, 5)
+ChatBox.BackgroundTransparency = 1
 ChatBox.BorderSizePixel = 0
 ChatBox.CanvasSize = UDim2.new(0, 0, 0, 0)
 ChatBox.AutomaticCanvasSize = Enum.AutomaticSize.Y 
+ChatBox.ScrollBarThickness = 5 
+ChatBox.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
+ChatBox.ScrollingDirection = Enum.ScrollingDirection.Y 
 
--- ترتيب الرسائل تلقائياً تحت بعضها
+local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = ChatBox
 UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-UIListLayout.Padding = UDim.new(0, 4)
+UIListLayout.Padding = UDim.new(0, 6) 
 
--- مربع الكتابة
-TextBox.Parent = MainFrame
-TextBox.PlaceholderText = "اكتب رسالتك هنا..."
-TextBox.Position = UDim2.new(0.05, 0, 0.78, 0)
-TextBox.Size = UDim2.new(0.68, 0, 0.16, 0)
-TextBox.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TextBox.TextXAlignment = Enum.TextXAlignment.Right 
+local TextBox = Instance.new("TextBox")
+TextBox.Parent = ChatFrame
+TextBox.Size = UDim2.new(1, -10, 0.22, -5)
+TextBox.Position = UDim2.new(0, 5, 0.78, 2)
+TextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+TextBox.BackgroundTransparency = 0.2
+TextBox.BorderSizePixel = 0
+TextBox.PlaceholderText = "To chat click here or press / key"
 TextBox.Text = ""
+TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+TextBox.TextSize = 14
+TextBox.Font = Enum.Font.SourceSansBold
+TextBox.TextXAlignment = Enum.TextXAlignment.Left
 
--- زر الإرسال
-SendButton.Parent = MainFrame
-SendButton.Text = "إرسال"
-SendButton.Position = UDim2.new(0.75, 0, 0.78, 0)
-SendButton.Size = UDim2.new(0.2, 0, 0.16, 0)
-SendButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
-SendButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-SendButton.Font = Enum.Font.SourceSansBold
-SendButton.TextSize = 14
+local function AddOldSchoolMessage(messageText)
+    local MessageFrame = Instance.new("Frame")
+    MessageFrame.Size = UDim2.new(1, -10, 0, 0) 
+    MessageFrame.AutomaticSize = Enum.AutomaticSize.Y 
+    MessageFrame.BackgroundTransparency = 1
+    MessageFrame.Parent = ChatBox
 
--- ✨ وظيفة إدراج الرسالة داخل الصندوق المرئي على الشاشة
-local function AddMessageToChatBox(text)
-    local MessageLabel = Instance.new("TextLabel")
-    MessageLabel.Parent = ChatBox
-    MessageLabel.Size = UDim2.new(1, -10, 0, 22)
-    MessageLabel.BackgroundTransparency = 1
-    MessageLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
-    MessageLabel.TextXAlignment = Enum.TextXAlignment.Right 
-    MessageLabel.TextSize = 14
-    MessageLabel.Text = text
-    
-    -- النزول التلقائي لآخر رسالة وصلت
-    ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
+    local TextLabel = Instance.new("TextLabel")
+    TextLabel.Size = UDim2.new(1, 0, 1, 0)
+    TextLabel.AutomaticSize = Enum.AutomaticSize.Y
+    TextLabel.BackgroundTransparency = 1
+    TextLabel.Text = messageText
+    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    TextLabel.TextSize = 15
+    TextLabel.Font = Enum.Font.SourceSans
+    TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TextLabel.TextYAlignment = Enum.TextYAlignment.Top
+    TextLabel.TextStrokeTransparency = 0.6
+    TextLabel.TextWrapped = true 
+    TextLabel.Parent = MessageFrame
+
+    task.spawn(function()
+        task.wait(0.05)
+        ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
+    end)
 end
 
--- 📡 وظيفة إرسال الرسالة إلى سيرفر بايثون على Railway
 local function SendMessageToServer(text)
     local payload = {
         username = LocalPlayer.Name,
@@ -126,41 +116,59 @@ local function SendMessageToServer(text)
             Url = SERVER_URL .. "/send_message",
             Method = "POST",
             Headers = {["Content-Type"] = "application/json"},
-            Body = game:GetService("HttpService"):JSONEncode(payload)
+            Body = HttpService:JSONEncode(payload)
         })
     end)
 end
 
--- ⚡ متغيرات التحكم في ليمت منع السبام الجديد (تم تعديله إلى 0.20 ثانية)
 local canSend = true
 local cooldownTime = 0.20
 
--- تفعيل زر الإرسال عند الضغط مع العداد التنازلي السريع
-SendButton.MouseButton1Click:Connect(function()
+local function ProcessMessageSubmission()
     if TextBox.Text ~= "" and canSend then
+        local msg = TextBox.Text
+        TextBox.Text = ""
+        
         canSend = false
+        SendMessageToServer(msg)
         
-        SendMessageToServer(TextBox.Text)
-        TextBox.Text = "" 
-        
-        -- تحويل الزر للون الأحمر وبدء العد التنازلي فائق السرعة
-        SendButton.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        
-        local timeLeft = cooldownTime
-        while timeLeft > 0 do
-            SendButton.Text = string.format("%.2f", timeLeft)
-            task.wait(0.05)
-            timeLeft = timeLeft - 0.05
-        end
-        
-        -- إعادة الزر لطبيعته
-        SendButton.Text = "إرسال"
-        SendButton.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+        task.wait(cooldownTime)
         canSend = true
+    end
+end
+
+TextBox.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        ProcessMessageSubmission()
     end
 end)
 
--- 📥 وظيفة جلب شات السيرفر باستمرار وتحديث القائمة (تم تقليل الوقت ليكون سريع جداً)
+local function ToggleChatStyle(forceState)
+    if forceState ~= nil then
+        ChatFrame.Visible = forceState
+    else
+        ChatFrame.Visible = not ChatFrame.Visible
+    end
+    
+    if ChatFrame.Visible then
+        ClassicChatIcon.TextTransparency = 0 
+    else
+        ClassicChatIcon.TextTransparency = 0.55 
+    end
+end
+
+ClassicChatIcon.MouseButton1Click:Connect(function()
+    ToggleChatStyle()
+end)
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if input.KeyCode == Enum.KeyCode.Slash and not gameProcessed then
+        task.wait(0.05)
+        ToggleChatStyle(true)
+        TextBox:CaptureFocus()
+    end
+end)
+
 local last_count = 0
 task.spawn(function()
     while true do
@@ -171,18 +179,17 @@ task.spawn(function()
             })
             
             if res.StatusCode == 200 then
-                local data = game:GetService("HttpService"):JSONDecode(res.Body)
+                local data = HttpService:JSONDecode(res.Body)
                 if #data.messages > last_count then
                     for i = last_count + 1, #data.messages do
-                        AddMessageToChatBox(data.messages[i])
+                        AddOldSchoolMessage(data.messages[i])
                     end
                     last_count = #data.messages
                 end
             end
         end)
-        task.wait(0.5) -- سحب التحديثات كل نصف ثانية لمزامنة سريعة جداً مع الـ 0.20
+        task.wait(0.5) 
     end
 end)
 
--- إرسال إشعار دخول اللاعب
-SendMessageToServer("متصل بالدردشة العالمية!")
+SendMessageToServer("Connected to global chat!")
