@@ -1,4 +1,4 @@
-local SERVER_URL = "https://roblox-chat-production.up.railway.app" 
+local SERVER_URL = "https://Roblox-chat-production-504f.up.railway.app" 
 
 local CREATOR_USERNAME = "3bdo_Aa2" 
 
