@@ -1,3 +1,4 @@
+```lua
 local SERVER_URL = "https://roblox-chat-production-6ca2.up.railway.app" 
 
 local CREATOR_USERNAME = "3bdo_Aa2" 
@@ -170,7 +171,7 @@ local function SendMessageToServer(text)
 end
 
 local canSend = true
-local cooldownTime = 0.20
+local cooldownTime = 0.50 -- زيادة طفيفة لضمان استقرار الإرسال المتتابع
 
 local function ProcessMessageSubmission()
     if TextBox.Text ~= "" and canSend then
@@ -178,7 +179,9 @@ local function ProcessMessageSubmission()
         TextBox.Text = ""
         
         canSend = false
-        SendMessageToServer(msg)
+        task.spawn(function()
+            SendMessageToServer(msg)
+        end)
         
         task.wait(cooldownTime)
         canSend = true
@@ -221,13 +224,13 @@ end)
 
 task.spawn(function()
     while true do
-        pcall(function()
+        local success, err = pcall(function()
             local res = request({
                 Url = SERVER_URL .. "/get_chat",
                 Method = "GET"
             })
             
-            if res.StatusCode == 200 then
+            if res and res.StatusCode == 200 then
                 local data = HttpService:JSONDecode(res.Body)
                 
                 if isFirstLoad then
@@ -245,8 +248,15 @@ task.spawn(function()
                 end
             end
         end)
-        task.wait(0.5) 
+        
+        -- التكرار والطلب كل 1.2 ثانية لتجنب الـ Rate Limit من Railway وحفظ سلامة السيرفر
+        task.wait(1.2) 
     end
 end)
 
-SendMessageToServer("Connected to global chat!")
+task.spawn(function()
+    task.wait(1)
+    SendMessageToServer("Connected to global chat!")
+end)
+
+```
