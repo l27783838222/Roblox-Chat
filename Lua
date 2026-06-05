@@ -11,7 +11,7 @@ pcall(function()
 end)
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "PerfectGlobalCircleChat"
+ScreenGui.Name = "Perfect46CircleChat"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true 
 ScreenGui.Parent = game:GetService("CoreGui")
@@ -37,6 +37,27 @@ ClassicChatIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
 ClassicChatIcon.TextSize = 19 
 ClassicChatIcon.Font = Enum.Font.Code 
 ClassicChatIcon.TextTransparency = 0 
+
+local BadgeFrame = Instance.new("Frame")
+BadgeFrame.Parent = EliteCircle
+BadgeFrame.Size = UDim2.new(0, 18, 0, 18)
+BadgeFrame.Position = UDim2.new(0.65, 0, -0.05, 0)
+BadgeFrame.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
+BadgeFrame.BorderSizePixel = 0
+BadgeFrame.Visible = false
+
+local UICornerBadge = Instance.new("UICorner")
+UICornerBadge.CornerRadius = UDim.new(1, 0)
+UICornerBadge.Parent = BadgeFrame
+
+local BadgeLabel = Instance.new("TextLabel")
+BadgeLabel.Parent = BadgeFrame
+BadgeLabel.Size = UDim2.new(1, 0, 1, 0)
+BadgeLabel.BackgroundTransparency = 1
+BadgeLabel.Text = "0"
+BadgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+BadgeLabel.TextSize = 11
+BadgeLabel.Font = Enum.Font.SourceSansBold
 
 local ChatFrame = Instance.new("Frame")
 ChatFrame.Parent = ScreenGui
@@ -78,6 +99,10 @@ TextBox.TextSize = 14
 TextBox.Font = Enum.Font.SourceSansBold
 TextBox.TextXAlignment = Enum.TextXAlignment.Left
 
+local unreadCount = 0
+local isFirstLoad = true
+local last_count = 0
+
 local function AddOldSchoolMessage(messageText)
     local MessageFrame = Instance.new("Frame")
     MessageFrame.Size = UDim2.new(1, -10, 0, 0) 
@@ -103,6 +128,12 @@ local function AddOldSchoolMessage(messageText)
         task.wait(0.05)
         ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
     end)
+
+    if not ChatFrame.Visible then
+        unreadCount = unreadCount + 1
+        BadgeLabel.Text = tostring(unreadCount)
+        BadgeFrame.Visible = true
+    end
 end
 
 local function SendMessageToServer(text)
@@ -152,6 +183,8 @@ local function ToggleChatStyle(forceState)
     
     if ChatFrame.Visible then
         ClassicChatIcon.TextTransparency = 0 
+        unreadCount = 0
+        BadgeFrame.Visible = false
     else
         ClassicChatIcon.TextTransparency = 0.55 
     end
@@ -169,7 +202,6 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-local last_count = 0
 task.spawn(function()
     while true do
         pcall(function()
@@ -180,6 +212,12 @@ task.spawn(function()
             
             if res.StatusCode == 200 then
                 local data = HttpService:JSONDecode(res.Body)
+                
+                if isFirstLoad then
+                    last_count = #data.messages
+                    isFirstLoad = false
+                end
+                
                 if #data.messages > last_count then
                     for i = last_count + 1, #data.messages do
                         AddOldSchoolMessage(data.messages[i])
