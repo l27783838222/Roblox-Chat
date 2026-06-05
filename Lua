@@ -1,10 +1,27 @@
 local SERVER_URL = "https://roblox-chat-production.up.railway.app" 
 
+local CREATOR_USERNAME = "3bdo_Aa2" 
+
 local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
+local DataStoreService = game:GetService("DataStoreService")
+
+-- إنشاء أو جلب قاعدة البيانات السحابية لحفظ الباند النهائي
+local ChatBanStore = DataStoreService:GetDataStore("GlobalChatSystem_Bans_v1")
+
+-- فحص هل اللاعب المحلي محظور نهائياً في السحاب أم لا قبل بناء الواجهة
+local isLocalPlayerBanned = false
+pcall(function()
+    isLocalPlayerBanned = ChatBanStore:GetAsync(LocalPlayer.Name) == true
+end)
+
+if isLocalPlayerBanned then
+    script:Destroy()
+    return
+end
 
 pcall(function()
     StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
@@ -102,8 +119,25 @@ TextBox.TextXAlignment = Enum.TextXAlignment.Left
 local unreadCount = 0
 local isFirstLoad = true
 local last_count = 0
+local mutedPlayers = {}
 
-local function AddOldSchoolMessage(messageText)
+local function ParseDuration(timeStr)
+    if not timeStr then return nil end
+    local num = tonumber(string.sub(timeStr, 1, -2))
+    local unit = string.sub(timeStr, -1)
+    if not num then return nil end
+    
+    if unit == "s" then return num
+    elseif unit == "m" then return num * 60
+    elseif unit == "h" then return num * 3600
+    elseif unit == "d" then return num * 86400
+    elseif unit == "w" then return num * 604800
+    elseif unit == "y" then return num * 31536000
+    end
+    return nil
+end
+
+local function AddOldSchoolMessage(messageText, isSystemAlert, isCreatorMessage)
     local MessageFrame = Instance.new("Frame")
     MessageFrame.Size = UDim2.new(1, -10, 0, 0) 
     MessageFrame.AutomaticSize = Enum.AutomaticSize.Y 
@@ -115,9 +149,19 @@ local function AddOldSchoolMessage(messageText)
     TextLabel.AutomaticSize = Enum.AutomaticSize.Y
     TextLabel.BackgroundTransparency = 1
     TextLabel.Text = messageText
-    TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    
+    if isSystemAlert then
+        TextLabel.TextColor3 = Color3.fromRGB(255, 85, 85)
+        TextLabel.Font = Enum.Font.SourceSansBold
+    elseif isCreatorMessage then
+        TextLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+        TextLabel.Font = Enum.Font.SourceSansBold
+    else
+        TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        TextLabel.Font = Enum.Font.SourceSans
+    end
+    
     TextLabel.TextSize = 15
-    TextLabel.Font = Enum.Font.SourceSans
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.TextYAlignment = Enum.TextYAlignment.Top
     TextLabel.TextStrokeTransparency = 0.6
@@ -129,7 +173,7 @@ local function AddOldSchoolMessage(messageText)
         ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
     end)
 
-    if not ChatFrame.Visible then
+    if not ChatFrame.Visible and not isSystemAlert then
         unreadCount = unreadCount + 1
         BadgeLabel.Text = tostring(unreadCount)
         BadgeFrame.Visible = true
@@ -137,8 +181,13 @@ local function AddOldSchoolMessage(messageText)
 end
 
 local function SendMessageToServer(text)
+    local senderName = LocalPlayer.Name
+    if senderName == CREATOR_USERNAME then
+        senderName = "👑 Creator | " .. CREATOR_USERNAME
+    end
+
     local payload = {
-        username = LocalPlayer.Name,
+        username = senderName,
         message = text
     }
     
@@ -159,6 +208,61 @@ local function ProcessMessageSubmission()
     if TextBox.Text ~= "" and canSend then
         local msg = TextBox.Text
         TextBox.Text = ""
+        
+        if LocalPlayer.Name == CREATOR_USERNAME then
+            if string.sub(msg, 1, 6) == "/mute " then
+                local args = string.split(string.sub(msg, 7), " ")
+                local targetName = args[1]
+                local durationStr = args[2]
+                
+                if targetName and targetName ~= "" then
+                    if targetName == CREATOR_USERNAME or string.find(targetName, CREATOR_USERNAME) then
+                        AddOldSchoolMessage("[System]: You cannot mute yourself!", true, false)
+                    else
+                        local duration = ParseDuration(durationStr)
+                        local expireTime = duration and (os.time() + duration) or tonumber(0x7FFFFFFF)
+                        mutedPlayers[targetName] = expireTime
+                        
+                        local timeMsg = durationStr and (" for " .. durationStr) or " permanently"
+                        AddOldSchoolMessage("[System]: Player '" .. targetName .. "' has been muted" .. timeMsg .. ".", true, false)
+                    end
+                end
+                return
+            elseif string.sub(msg, 1, 8) == "/unmute " then
+                local targetName = string.sub(msg, 9)
+                if targetName and targetName ~= "" then
+                    if mutedPlayers[targetName] then
+                        mutedPlayers[targetName] = nil
+                        AddOldSchoolMessage("[System]: Player '" .. targetName .. "' has been unmuted.", true, false)
+                    else
+                        AddOldSchoolMessage("[System]: Player '" .. targetName .. "' is not muted.", true, false)
+                    end
+                end
+                return
+            elseif string.sub(msg, 1, 5) == "/ban " then
+                local targetName = string.sub(msg, 6)
+                if targetName and targetName ~= "" then
+                    if targetName == CREATOR_USERNAME or string.find(targetName, CREATOR_USERNAME) then
+                        AddOldSchoolMessage("[System]: You cannot ban yourself!", true, false)
+                    else
+                        pcall(function()
+                            ChatBanStore:SetAsync(targetName, true)
+                        end)
+                        AddOldSchoolMessage("[System]: Player '" .. targetName .. "' has been PERMANENTLY banned from the system via DataStore.", true, false)
+                    end
+                end
+                return
+            elseif string.sub(msg, 1, 7) == "/unban " then
+                local targetName = string.sub(msg, 8)
+                if targetName and targetName ~= "" then
+                    pcall(function()
+                        ChatBanStore:SetAsync(targetName, false)
+                    end)
+                    AddOldSchoolMessage("[System]: Player '" .. targetName .. "' has been unbanned from DataStore.", true, false)
+                end
+                return
+            end
+        end
         
         canSend = false
         SendMessageToServer(msg)
@@ -202,6 +306,15 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
+local function CheckIfSenderIsBanned(senderName)
+    local isBanned = false
+    pcall(function()
+        isBanned = ChatBanStore:GetAsync(senderName) == true
+    end)
+    return isBanned
+end
+
+local last_count = 0
 task.spawn(function()
     while true do
         pcall(function()
@@ -220,7 +333,38 @@ task.spawn(function()
                 
                 if #data.messages > last_count then
                     for i = last_count + 1, #data.messages do
-                        AddOldSchoolMessage(data.messages[i])
+                        local fullMessage = data.messages[i]
+                        local isPlayerMuted = false
+                        local currentTime = os.time()
+                        
+                        local cleanName = string.match(fullMessage, "%[(.-)%]") or string.match(fullMessage, "Creator | (.-):") or ""
+                        if cleanName and string.sub(cleanName, 1, 12) == "👑 Creator | " then
+                            cleanName = string.sub(cleanName, 13)
+                        end
+                        
+                        local isBanned = false
+                        if cleanName ~= "" and cleanName ~= CREATOR_USERNAME then
+                            isBanned = CheckIfSenderIsBanned(cleanName)
+                        end
+                        
+                        if not isBanned then
+                            for mutedName, expire in pairs(mutedPlayers) do
+                                if (string.find(fullMessage, "%[" .. mutedName .. "%]") or string.find(fullMessage, "Creator | " .. mutedName)) 
+                                   and not string.find(fullMessage, CREATOR_USERNAME) then
+                                    if currentTime < expire then
+                                        isPlayerMuted = true
+                                    else
+                                        mutedPlayers[mutedName] = nil
+                                    end
+                                    break
+                                end
+                            end
+                            
+                            if not isPlayerMuted then
+                                local isCreatorMsg = string.find(fullMessage, "%[👑 Creator") ~= nil
+                                AddOldSchoolMessage(fullMessage, false, isCreatorMsg)
+                            end
+                        end
                     end
                     last_count = #data.messages
                 end
