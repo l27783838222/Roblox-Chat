@@ -1,52 +1,97 @@
-local SERVER_URL = "https://roblox-chat-production-75be.up.railway.app" 
+-- =========================================================================
+-- SYSTEM: PERFECT GLOBAL CHAT (🌗 LEFT-ALIGNED MODERN MODE)
+-- CREATOR: 3bdo_Aa2
+-- =========================================================================
 
+local SERVER_URL = "https://roblox-chat-production-75be.up.railway.app" 
 local CREATOR_USERNAME = "3bdo_Aa2" 
 
-local StarterGui = game:GetService("StarterGui")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
+local CoreGui = game:GetService("CoreGui")
 
-pcall(function()
-    StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.Chat, false)
-end)
+if CoreGui:FindFirstChild("Perfect46CircleChat") then CoreGui.Perfect46CircleChat:Destroy() end
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "Perfect46CircleChat"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true 
-ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.DisplayOrder = 10 
+ScreenGui.Parent = CoreGui
 
+-- =========================================================================
+-- [الجزء الأول]: الكبسولة والدرع الصلب (المقاسات المعتمدة بالملي)
+-- =========================================================================
+local BaseCapsule = Instance.new("Frame")
+BaseCapsule.Name = "BaseCapsule"
+BaseCapsule.Size = UDim2.new(0, 98, 0, 42) 
+BaseCapsule.Position = UDim2.new(0, 63.5, 0, 12) 
+BaseCapsule.BackgroundTransparency = 1 
+BaseCapsule.BorderSizePixel = 0
+BaseCapsule.Parent = ScreenGui
+
+local ChatPart = Instance.new("Frame")
+ChatPart.Name = "ChatPart"
+ChatPart.Size = UDim2.new(0.5, 0, 1, 0) 
+ChatPart.Position = UDim2.new(0.5, 0, 0, 0)
+ChatPart.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
+ChatPart.BackgroundTransparency = 0 
+ChatPart.Active = true 
+ChatPart.Selectable = true
+ChatPart.BorderSizePixel = 0
+ChatPart.ZIndex = 5 
+ChatPart.Parent = BaseCapsule
+
+local UICornerChat = Instance.new("UICorner")
+UICornerChat.CornerRadius = UDim.new(1, 0)
+UICornerChat.Parent = ChatPart
+
+-- =========================================================================
+-- [الجزء الثاني]: زر الشات العالمي (شكل الكبسولة المقسومة 🌗)
+-- =========================================================================
 local EliteCircle = Instance.new("Frame")
 EliteCircle.Parent = ScreenGui
-EliteCircle.Size = UDim2.new(0, 46, 0, 46) 
-EliteCircle.Position = UDim2.new(0, 15, 0, 58) 
+EliteCircle.Size = UDim2.new(0, 98, 0, 42) 
+EliteCircle.Position = UDim2.new(0, 63.5, 0, 12) 
 EliteCircle.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
-EliteCircle.BackgroundTransparency = 0.2 
+EliteCircle.BackgroundTransparency = 0.4 
 EliteCircle.BorderSizePixel = 0
+EliteCircle.ZIndex = 20 
 
 local UICornerCircle = Instance.new("UICorner")
 UICornerCircle.CornerRadius = UDim.new(1, 0) 
 UICornerCircle.Parent = EliteCircle
 
+local MoonGradient = Instance.new("UIGradient")
+MoonGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 1),    
+    NumberSequenceKeypoint.new(0.48, 1), 
+    NumberSequenceKeypoint.new(0.52, 0),  
+    NumberSequenceKeypoint.new(1, 0)
+})
+MoonGradient.Parent = EliteCircle
+
 local ClassicChatIcon = Instance.new("TextButton")
 ClassicChatIcon.Parent = EliteCircle
-ClassicChatIcon.Size = UDim2.new(1, 0, 1, 0)
+ClassicChatIcon.Size = UDim2.new(0.5, 0, 1, 0)
+ClassicChatIcon.Position = UDim2.new(0.5, 0, 0, 0)
 ClassicChatIcon.BackgroundTransparency = 1
 ClassicChatIcon.Text = "[=]" 
 ClassicChatIcon.TextColor3 = Color3.fromRGB(255, 255, 255)
-ClassicChatIcon.TextSize = 19 
+ClassicChatIcon.TextSize = 16 
 ClassicChatIcon.Font = Enum.Font.Code 
-ClassicChatIcon.TextTransparency = 0 
+ClassicChatIcon.ZIndex = 21
 
 local BadgeFrame = Instance.new("Frame")
 BadgeFrame.Parent = EliteCircle
-BadgeFrame.Size = UDim2.new(0, 18, 0, 18)
-BadgeFrame.Position = UDim2.new(0.65, 0, -0.05, 0)
-BadgeFrame.BackgroundColor3 = Color3.fromRGB(230, 50, 50)
+BadgeFrame.Size = UDim2.new(0, 16, 0, 16)
+BadgeFrame.Position = UDim2.new(0.82, 0, -0.05, 0)
+BadgeFrame.BackgroundColor3 = Color3.fromRGB(255, 65, 65)
 BadgeFrame.BorderSizePixel = 0
 BadgeFrame.Visible = false
+BadgeFrame.ZIndex = 22
 
 local UICornerBadge = Instance.new("UICorner")
 UICornerBadge.CornerRadius = UDim.new(1, 0)
@@ -58,29 +103,39 @@ BadgeLabel.Size = UDim2.new(1, 0, 1, 0)
 BadgeLabel.BackgroundTransparency = 1
 BadgeLabel.Text = "0"
 BadgeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-BadgeLabel.TextSize = 11
+BadgeLabel.TextSize = 10
 BadgeLabel.Font = Enum.Font.SourceSansBold
+BadgeLabel.ZIndex = 23
 
+-- =========================================================================
+-- [الجزء الثالث]: صندوق المحادثات والشات (منقول ومحاذى لليسار بالملي 🌗)
+-- =========================================================================
 local ChatFrame = Instance.new("Frame")
 ChatFrame.Parent = ScreenGui
-ChatFrame.Size = UDim2.new(0, 360, 0, 150)
-ChatFrame.Position = UDim2.new(0, 16, 0, 115) 
+ChatFrame.Size = UDim2.new(0, 400, 0, 220) 
+-- تم تعديل الـ Position لتبدأ من المحاذاة اليسرى (0, 12) تحت الزر تماماً لتناسب نظام روبلوكس الحديث
+ChatFrame.Position = UDim2.new(0, 12, 0, 60) 
 ChatFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-ChatFrame.BackgroundTransparency = 0.4
+ChatFrame.BackgroundTransparency = 0.35 
 ChatFrame.BorderSizePixel = 0
 ChatFrame.Visible = true
+ChatFrame.ZIndex = 20 
+
+local UIChatFrameCorner = Instance.new("UICorner")
+UIChatFrameCorner.CornerRadius = UDim.new(0, 8)
+UIChatFrameCorner.Parent = ChatFrame
 
 local ChatBox = Instance.new("ScrollingFrame")
 ChatBox.Parent = ChatFrame
-ChatBox.Size = UDim2.new(1, -10, 0.78, -5)
-ChatBox.Position = UDim2.new(0, 5, 0, 5)
+ChatBox.Size = UDim2.new(1, -12, 0.80, -5)
+ChatBox.Position = UDim2.new(0, 6, 0, 6)
 ChatBox.BackgroundTransparency = 1
 ChatBox.BorderSizePixel = 0
 ChatBox.CanvasSize = UDim2.new(0, 0, 0, 0)
 ChatBox.AutomaticCanvasSize = Enum.AutomaticSize.Y 
-ChatBox.ScrollBarThickness = 5 
+ChatBox.ScrollBarThickness = 2 
 ChatBox.ScrollBarImageColor3 = Color3.fromRGB(255, 255, 255)
-ChatBox.ScrollingDirection = Enum.ScrollingDirection.Y 
+ChatBox.ZIndex = 21
 
 local UIListLayout = Instance.new("UIListLayout")
 UIListLayout.Parent = ChatBox
@@ -89,55 +144,61 @@ UIListLayout.Padding = UDim.new(0, 6)
 
 local TextBox = Instance.new("TextBox")
 TextBox.Parent = ChatFrame
-TextBox.Size = UDim2.new(1, -10, 0.22, -5)
-TextBox.Position = UDim2.new(0, 5, 0.78, 2)
+TextBox.Size = UDim2.new(1, -12, 0.16, -4)
+TextBox.Position = UDim2.new(0, 6, 0.82, 2)
 TextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 TextBox.BackgroundTransparency = 0.2
 TextBox.BorderSizePixel = 0
-TextBox.PlaceholderText = "To chat click here or press / key"
+TextBox.ClearTextOnFocus = false
+TextBox.PlaceholderText = "To chat here, click or press /"
 TextBox.Text = ""
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.TextSize = 14
-TextBox.Font = Enum.Font.SourceSansBold
+TextBox.Font = Enum.Font.SourceSans
 TextBox.TextXAlignment = Enum.TextXAlignment.Left
+TextBox.ZIndex = 21
+
+local UITextCorner = Instance.new("UICorner")
+UITextCorner.CornerRadius = UDim.new(0, 6)
+UITextCorner.Parent = TextBox
 
 local unreadCount = 0
 local isFirstLoad = true
 local last_count = 0
 
-local function AddOldSchoolMessage(messageText, isSystemAlert, isCreatorMessage)
+local function AddModernMessage(messageText, isSystemAlert, isCreatorMessage)
     local MessageFrame = Instance.new("Frame")
     MessageFrame.Size = UDim2.new(1, -10, 0, 0) 
     MessageFrame.AutomaticSize = Enum.AutomaticSize.Y 
     MessageFrame.BackgroundTransparency = 1
     MessageFrame.Parent = ChatBox
+    MessageFrame.ZIndex = 21
 
     local TextLabel = Instance.new("TextLabel")
     TextLabel.Size = UDim2.new(1, 0, 1, 0)
     TextLabel.AutomaticSize = Enum.AutomaticSize.Y
     TextLabel.BackgroundTransparency = 1
     TextLabel.Text = messageText
-    
-    if isSystemAlert then
-        TextLabel.TextColor3 = Color3.fromRGB(255, 85, 85)
-        TextLabel.Font = Enum.Font.SourceSansBold
-    elseif isCreatorMessage then
-        TextLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
-        TextLabel.Font = Enum.Font.SourceSansBold
-    else
-        TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TextLabel.Font = Enum.Font.SourceSans
-    end
-    
     TextLabel.TextSize = 15
     TextLabel.TextXAlignment = Enum.TextXAlignment.Left
     TextLabel.TextYAlignment = Enum.TextYAlignment.Top
-    TextLabel.TextStrokeTransparency = 0.6
+    TextLabel.TextStrokeTransparency = 0.75 
     TextLabel.TextWrapped = true 
     TextLabel.Parent = MessageFrame
+    TextLabel.ZIndex = 22
 
-    task.spawn(function()
-        task.wait(0.05)
+    if isSystemAlert then
+        TextLabel.TextColor3 = Color3.fromRGB(255, 90, 90)
+        TextLabel.Font = Enum.Font.SourceSansBold
+    elseif isCreatorMessage then
+        TextLabel.TextColor3 = Color3.fromRGB(255, 200, 0)
+        TextLabel.Font = Enum.Font.SourceSansBold
+    else
+        TextLabel.TextColor3 = Color3.fromRGB(240, 240, 240)
+        TextLabel.Font = Enum.Font.SourceSans
+    end
+
+    task.defer(function()
         ChatBox.CanvasPosition = Vector2.new(0, ChatBox.AbsoluteCanvasSize.Y)
     end)
 
@@ -154,23 +215,28 @@ local function SendMessageToServer(text)
         senderName = "👑 Creator | " .. CREATOR_USERNAME
     end
 
+    local finalMessage = "[" .. senderName .. "]: " .. text
+
     local payload = {
         username = senderName,
-        message = text
+        message = finalMessage
     }
     
-    pcall(function()
-        return request({
-            Url = SERVER_URL .. "/send_message",
-            Method = "POST",
-            Headers = {["Content-Type"] = "application/json"},
-            Body = HttpService:JSONEncode(payload)
-        })
-    end)
+    local reqFunc = (syn and syn.request) or (http and http.request) or request
+    if reqFunc then
+        pcall(function()
+            reqFunc({
+                Url = SERVER_URL .. "/send_message",
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+    end
 end
 
 local canSend = true
-local cooldownTime = 0.50
+local cooldownTime = 0.40
 
 local function ProcessMessageSubmission()
     if TextBox.Text ~= "" and canSend then
@@ -222,9 +288,12 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 task.spawn(function()
+    local reqFunc = (syn and syn.request) or (http and http.request) or request
+    if not reqFunc then return end
+
     while true do
         local success, err = pcall(function()
-            local res = request({
+            local res = reqFunc({
                 Url = SERVER_URL .. "/get_chat",
                 Method = "GET"
             })
@@ -235,13 +304,14 @@ task.spawn(function()
                 if isFirstLoad then
                     last_count = #data.messages
                     isFirstLoad = false
+                    AddModernMessage("System: Connected to global chat room.", true, false)
                 end
                 
                 if #data.messages > last_count then
                     for i = last_count + 1, #data.messages do
                         local fullMessage = data.messages[i]
-                        local isCreatorMsg = string.find(fullMessage, "%[👑 Creator") ~= nil
-                        AddOldSchoolMessage(fullMessage, false, isCreatorMsg)
+                        local isCreatorMsg = string.find(fullMessage, "👑 Creator") ~= nil or string.find(fullMessage, CREATOR_USERNAME) ~= nil
+                        AddModernMessage(fullMessage, false, isCreatorMsg)
                     end
                     last_count = #data.messages
                 end
@@ -252,6 +322,28 @@ task.spawn(function()
 end)
 
 task.spawn(function()
-    task.wait(1)
-    SendMessageToServer("Connected to global chat!")
+    task.wait(1.5)
+    local reqFunc = (syn and syn.request) or (http and http.request) or request
+    if reqFunc then
+        pcall(function()
+            reqFunc({
+                Url = SERVER_URL .. "/send_message",
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode({
+                    username = "System",
+                    message = "⚠️ " .. LocalPlayer.Name .. " joined the global channel."
+                })
+            })
+        end)
+    end
+end)
+
+-- حلقة التثبيت المستمر للواجهات
+task.spawn(function()
+    while true do
+        BaseCapsule.Visible = true
+        EliteCircle.Visible = true
+        task.wait(0.1)
+    end
 end)
