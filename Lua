@@ -1,5 +1,5 @@
 -- =========================================================================
--- SYSTEM: PERFECT GLOBAL CHAT (🌗 LEFT-ALIGNED MODERN MODE)
+-- SYSTEM: PERFECT GLOBAL CHAT (⚡ INSTANT MODE - NO DELAY)
 -- CREATOR: 3bdo_Aa2
 -- =========================================================================
 
@@ -21,9 +21,7 @@ ScreenGui.IgnoreGuiInset = true
 ScreenGui.DisplayOrder = 10 
 ScreenGui.Parent = CoreGui
 
--- =========================================================================
--- [الجزء الأول]: الكبسولة والدرع الصلب (المقاسات المعتمدة بالملي)
--- =========================================================================
+-- [الجزء الأول]: الكبسولة والدرع الصلب
 local BaseCapsule = Instance.new("Frame")
 BaseCapsule.Name = "BaseCapsule"
 BaseCapsule.Size = UDim2.new(0, 98, 0, 42) 
@@ -48,9 +46,7 @@ local UICornerChat = Instance.new("UICorner")
 UICornerChat.CornerRadius = UDim.new(1, 0)
 UICornerChat.Parent = ChatPart
 
--- =========================================================================
--- [الجزء الثاني]: زر الشات العالمي (شكل الكبسولة المقسومة 🌗)
--- =========================================================================
+-- [الجزء الثاني]: زر الشات العالمي 🌗
 local EliteCircle = Instance.new("Frame")
 EliteCircle.Parent = ScreenGui
 EliteCircle.Size = UDim2.new(0, 98, 0, 42) 
@@ -107,13 +103,10 @@ BadgeLabel.TextSize = 10
 BadgeLabel.Font = Enum.Font.SourceSansBold
 BadgeLabel.ZIndex = 23
 
--- =========================================================================
--- [الجزء الثالث]: صندوق المحادثات والشات (منقول ومحاذى لليسار بالملي 🌗)
--- =========================================================================
+-- [الجزء الثالث]: صندوق المحادثات
 local ChatFrame = Instance.new("Frame")
 ChatFrame.Parent = ScreenGui
 ChatFrame.Size = UDim2.new(0, 400, 0, 220) 
--- تم تعديل الـ Position لتبدأ من المحاذاة اليسرى (0, 12) تحت الزر تماماً لتناسب نظام روبلوكس الحديث
 ChatFrame.Position = UDim2.new(0, 12, 0, 60) 
 ChatFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 ChatFrame.BackgroundTransparency = 0.35 
@@ -209,47 +202,38 @@ local function AddModernMessage(messageText, isSystemAlert, isCreatorMessage)
     end
 end
 
+-- [دالة الإرسال المعدلة: إرسال فوري ومستقل]
 local function SendMessageToServer(text)
     local senderName = LocalPlayer.Name
     if senderName == CREATOR_USERNAME then
         senderName = "👑 Creator | " .. CREATOR_USERNAME
     end
 
-    local finalMessage = "[" .. senderName .. "]: " .. text
-
     local payload = {
         username = senderName,
-        message = finalMessage
+        message = text
     }
     
     local reqFunc = (syn and syn.request) or (http and http.request) or request
     if reqFunc then
-        pcall(function()
-            reqFunc({
-                Url = SERVER_URL .. "/send_message",
-                Method = "POST",
-                Headers = {["Content-Type"] = "application/json"},
-                Body = HttpService:JSONEncode(payload)
-            })
+        task.spawn(function()
+            pcall(function()
+                reqFunc({
+                    Url = SERVER_URL .. "/send_message",
+                    Method = "POST",
+                    Headers = {["Content-Type"] = "application/json"},
+                    Body = HttpService:JSONEncode(payload)
+                })
+            end)
         end)
     end
 end
 
-local canSend = true
-local cooldownTime = 0.40
-
 local function ProcessMessageSubmission()
-    if TextBox.Text ~= "" and canSend then
+    if TextBox.Text ~= "" then
         local msg = TextBox.Text
         TextBox.Text = ""
-        
-        canSend = false
-        task.spawn(function()
-            SendMessageToServer(msg)
-        end)
-        
-        task.wait(cooldownTime)
-        canSend = true
+        SendMessageToServer(msg)
     end
 end
 
@@ -332,14 +316,13 @@ task.spawn(function()
                 Headers = {["Content-Type"] = "application/json"},
                 Body = HttpService:JSONEncode({
                     username = "System",
-                    message = "⚠️ " .. LocalPlayer.Name .. " joined the global channel."
+                    message = "⚠️ " .. LocalPlayer.Name .. " joined."
                 })
             })
         end)
     end
 end)
 
--- حلقة التثبيت المستمر للواجهات
 task.spawn(function()
     while true do
         BaseCapsule.Visible = true
@@ -347,3 +330,4 @@ task.spawn(function()
         task.wait(0.1)
     end
 end)
+
